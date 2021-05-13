@@ -22,7 +22,7 @@ def validate_path(path_string):
     # accept a path string and confirm that it
     # both exists and is a directory
     try:
-        path = pathlib.Path(path_string)
+        path = pathlib.Path(path_string).expanduser()
         if not path.exists():
             raise FileNotFoundError("not a valid path")
         if not path.is_dir():
@@ -36,7 +36,11 @@ def main(check, interval, save_path, model_path):
     # Confirm that the provided save path and model paths are valid
     try:
         path_save = validate_path(save_path)
+        print(f"Saving images to {save_path}")
+
         path_model = validate_path(model_path)
+        print(f"Loading models from {model_path}")
+
     except Exception as err:
         print(err)
         exit()
@@ -84,11 +88,13 @@ def main(check, interval, save_path, model_path):
             # (for use to make the interesting/not-interesting model better)
             # and wait the interval set for uninteresting images
             elif label == Labels.NOT_INTERESTING:
+                if not path_save.joinpath('uninteresting').exists():
+                    os.mkdir(path_save.joinpath('uninteresting'))
                 save_filename = path_save.joinpath('uninteresting').joinpath(f"un-{time_stamp}.jpg")
                 img.save(save_filename)
                 time.sleep(check)
 
-            # if some otherlabel is predicted, there's a problem with the model
+            # if some other label is predicted, there's a problem with the model
             # print something out and exit execution
             else:
                 print(f"Unexpected result: {label}")
