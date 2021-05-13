@@ -59,8 +59,12 @@ def main(check, interval, save_to, interest, categories):
 
     with picamera.PiCamera(resolution=(224, 224), framerate=30) as camera:
 
+        # Create a subdirectory for uninteresting images
         path_uninteresting = make_subdir(path_save, 'uninteresting')
 
+        # Read the list of labels from the category model directory
+        # and create subdirectories for each label, save the path
+        # references for later use
         save_paths = dict()
         with open(path_categories.joinpath('labels.txt'), 'r') as labels_file:
             labels = [line.strip() for line in labels_file.readlines()]
@@ -101,7 +105,7 @@ def main(check, interval, save_to, interest, categories):
                 camera.annotate_text = f"{label}\n{time_stamp}"
                 time.sleep(interval)
 
-            # if the image was predicted uninteresting, save it to a sub-directory
+            # if the image was predicted uninteresting, save it to a subdirectory
             # (for use to make the interesting/not-interesting model better)
             # and wait the interval set for uninteresting images
             elif label == Labels.UNINTERESTING:
