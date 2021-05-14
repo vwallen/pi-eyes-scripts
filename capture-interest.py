@@ -15,7 +15,7 @@ from lobe import ImageModel
 
 class Labels(str, Enum):
     INTERESTING = 'interesting'
-    NOT_INTERESTING = 'not interesting'
+    UNINTERESTING = 'uninteresting'
 
 
 def validate_path(path_string):
@@ -87,7 +87,7 @@ def main(check, interval, save_path, model_path):
             # if the image was predicted uninteresting, save it to a sub-directory
             # (for use to make the interesting/not-interesting model better)
             # and wait the interval set for uninteresting images
-            elif label == Labels.NOT_INTERESTING:
+            elif label == Labels.UNINTERESTING:
                 if not path_save.joinpath('uninteresting').exists():
                     os.mkdir(path_save.joinpath('uninteresting'))
                 save_filename = path_save.joinpath('uninteresting').joinpath(f"un-{time_stamp}.jpg")

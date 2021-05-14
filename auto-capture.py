@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# Standard library modules
 import argparse
 import io
 import os
@@ -7,6 +8,8 @@ import time
 import pathlib
 from datetime import datetime
 
+# 3rd party modules that
+# may require installation
 import picamera
 from PIL import Image
 
@@ -17,10 +20,10 @@ def main(interval, save_path):
     try:
         path = pathlib.Path(save_path)
         if not path.exists():
-            raise FileNotFoundError("Not a valid path")
+            raise FileNotFoundError("not a valid path")
 
         if not path.is_dir():
-            raise NotADirectoryError("Path is not a directory")
+            raise NotADirectoryError("path is not a directory")
 
     except Exception as e:
         print(f"Unable to save to {save_path}, {e}")
@@ -38,24 +41,26 @@ def main(interval, save_path):
             camera.annotate_text = "Ready..."
             stream.seek(0)
 
+            # Use current time stamp for image file name
+            # and append to the save location's path
             time_stamp = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-            image_name = path.joinpath(f"{time_stamp}.jpg")
+            save_filename = path.joinpath(f"{time_stamp}.jpg")
 
             camera.annotate_text = None
             camera.capture(stream, format='jpeg')
             img = Image.open(stream)
-            img.save(image_name)
+            img.save(save_filename)
 
+            # Update display with last timestamp
+            # and print save confirmation
             camera.annotate_text = f"Saved at:\n{time_stamp}"
-            print(f"Saved image to: {image_name}")
+            print(f"Saved image to: {save_filename}")
 
             time.sleep(interval)
 
 
 if __name__ == '__main__':
     try:
-        print(f"Capture starting, to stop press \"CTRL+C\"")
-
         # Accept arguments on the command line for the
         # interval between image captures, and the path
         # to save captured images to. Default to saving
@@ -65,6 +70,7 @@ if __name__ == '__main__':
         parser.add_argument("-i", "--interval", required=False, help="Seconds between image capture", default=10, type=int)
         args = parser.parse_args()
 
+        print(f"Capture starting, to stop press \"CTRL+C\"")
         main(args.interval, args.path)
 
     except KeyboardInterrupt:

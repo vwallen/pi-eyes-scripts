@@ -37,17 +37,19 @@ def make_subdir(root, dirname):
         os.mkdir(directory)
     return directory
 
-def main(check, interval, save_to, interest, categories):
+def main(check, interval, save_to, interest, categories, no_cap):
     # Confirm that the provided save path and model paths are valid
     try:
         path_save = validate_path(save_to)
         print(f"Saving images to {save_to}")
+        if no_cap:
+            print("Saving uninteresting images disabled")
 
         path_interest = validate_path(interest)
-        print(f"Loading model from {interest}")
+        print(f"Loading interest model from {interest}")
 
         path_categories = validate_path(categories)
-        print(f"Loading model from {categories}")
+        print(f"Loading category model from {categories}")
 
     except Exception as err:
         print(err)
@@ -109,8 +111,9 @@ def main(check, interval, save_to, interest, categories):
             # (for use to make the interesting/not-interesting model better)
             # and wait the interval set for uninteresting images
             elif label == Labels.UNINTERESTING:
-                save_filename = path_uninteresting.joinpath(f"un-{time_stamp}.jpg")
-                img.save(save_filename)
+                if not no_cap:
+                    save_filename = path_uninteresting.joinpath(f"un-{time_stamp}.jpg")
+                    img.save(save_filename)
                 time.sleep(check)
 
             # if some other label is predicted, there's a problem with the model
@@ -135,11 +138,11 @@ if __name__ == '__main__':
         parser.add_argument("categories", nargs='?', help="Path to category model", default='~/models/categories')
         parser.add_argument("-c", "--check", required=False, help="Seconds between image checks", default=60, type=int)
         parser.add_argument("-i", "--interval", required=False, help="Seconds between image capture", default=1, type=int)
+        parser.add_argument("--no-cap", required=False, help="Disable capture of uninteresting images", action='store_true')
         args = parser.parse_args()
 
-        print(f"Capture starting, to stop press \"CTRL+C\"")
-        main(args.check, args.interval, args.path, args.interest, args.categories)
+        print(f"Capture starting...")
+        main(args.check, args.interval, args.path, args.interest, args.categories, args.no_cap)
 
     except KeyboardInterrupt:
-        print("")
-        print(f"Caught interrupt, exiting...")
+        print(f"\nCaught interrupt, exiting...")
